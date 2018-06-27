@@ -10,7 +10,7 @@
 is_posdef = function(A, tol=1e-9) {
   p = nrow(matrix(A))
   
-  if (p<3) {
+  if (p<100) {
     lambda_min = min(eigen(A)$values)
   }
   else {

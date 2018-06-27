@@ -1,8 +1,8 @@
 Package: knockoff
 Type: Package
 Title: The Knockoff Filter for Controlled Variable Selection
-Version: 0.3.0
-Date: 2017-10-16
+Version: 0.3.1
+Date: 2018-06-27
 Authors@R: c(person("Rina", "Foygel Barber", role = c("ctb"),
                      comment="Development of the original fixed-design Knockoffs"),
              person("Emmanuel", "Candes", role = c("ctb"),
@@ -21,7 +21,7 @@ Description: The knockoff filter is a general procedure for controlling the fals
 License: GPL-3
 URL: https://web.stanford.edu/group/candes/knockoffs/index.html
 Depends: methods, stats
-Imports: Rdsdp, Matrix, corpcor, glmnet, RSpectra, gtools
+Imports: Rdsdp, Matrix, corpcor, glmnet, RSpectra, gtools, utils
 Suggests: knitr, testthat, rmarkdown, lars, ranger, stabs, flare, doMC, parallel
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
