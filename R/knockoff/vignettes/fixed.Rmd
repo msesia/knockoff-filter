@@ -1,0 +1,61 @@
+---
+title: "Controlled variable Selection with Fixed-X Knockoffs"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Controlled variable Selection with Fixed-X Knockoffs}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+  
+This vignette illustrates the basic usage of the `knockoff` package with Fixed-X knockoffs. In this scenario we make no assumptions on the distribution of the predictors (which can be considered fixed), but we assume a homoscedastic linear regression model for the response. 
+In this scenario, knockoffs only control the FDR if used in combination with statistics that satisfy the "sufficiency" property. In particular, the default statistics based on the cross-validated lasso are not valid.
+
+For simplicity, we will use synthetic data constructed from a linear model such that the response only depends on a small fraction of the variables.
+
+
+```{r, results='hide', message=FALSE, warning=FALSE}
+set.seed(1234)
+```
+
+```{r}
+# Problem parameters
+n = 1000          # number of observations
+p = 300           # number of variables
+k = 30            # number of variables with nonzero coefficients
+amplitude = 4.5   # signal amplitude (for noise level = 1)
+
+# Generate the variables from a multivariate normal distribution
+mu = rep(0,p)
+rho = 0.25
+Sigma = toeplitz(rho^(0:(p-1)))
+X = matrix(rnorm(n*p),n) %*% chol(Sigma)
+
+# Generate the response from a linear model
+nonzero = sample(p, k)
+beta = amplitude * (1:p %in% nonzero) / sqrt(n)
+y.sample = function(X) X %*% beta + rnorm(n)
+y = y.sample(X)
+```
+
+First examples
+--------------
+In order to create fixed-design knockoffs, we call `knockoff.filter` with the parameter `statistic` equal to `stat.glmnet_lambdadiff`. Moreover, since not all statistics are valid with fixed-design knockoffs, we use `stat.glmnet_lambdasmax` instead of the default one (which is based on cross-validation).
+```{r, results='hide', message=FALSE}
+library(knockoff)
+result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.glmnet_lambdasmax)
+```
+We can display the results with
+```{r}
+print(result)
+```
+The default value for the target false discovery rate is 0.1. In this experiment the false discovery proportion is
+```{r}
+fdp = function(selected) sum(beta[selected] == 0) / max(1, length(selected))
+fdp(result$selected)
+```
+
+See also
+--------
+If you want to see some basic usage of the knockoff filter, see the [introductory vignette](knockoff.html).
+If you want to look inside the knockoff filter, see the [advanced vignette](advanced.html).

@@ -1,0 +1,216 @@
+---
+title: "Analysis of HIV Drug Resistance Data"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: references.bib
+vignette: >
+  %\VignetteIndexEntry{Analysis of HIV Drug Resistance Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+```{r, echo=FALSE}
+knitr::knit_hooks$set(small.margin = function(before, options, envir) {
+    if (before) par(mar = c(2,3,3,2))
+})
+```
+
+In this vignette, we illustrate the analysis of a real (non-simulated) data set, including all the pre-processing steps. We hope this example will guide the user in their own applications of the knockoff filter. Throughout this example we will apply the knockoff filter in the Fixed-X scenario.
+
+The scientific goal is to determine which mutations of the Human Immunodeficiency Virus Type 1 (HIV-1) are associated with drug resistance. The data set, publicly available from the [Stanford HIV Drug Resistance Database][hivdb], was originally analyzed in [@rhee2006]. The analysis described here is exactly that carried out for the knockoff filter paper [@barber2014].
+
+[hivdb]: http://hivdb.stanford.edu/pages/published_analysis/genophenoPNAS2006/
+
+# Preparing the data
+
+The data set consists of measurements for three classes of drugs: protease inhibitors (PIs), nucleoside reverse transcriptase (RT) inhibitors (NRTIs), and nonnucleoside RT inhibitors (NNRTIs). Protease and reverse transcriptase are two enzymes in HIV-1 that are crucial to the function of the virus. This data set seeks associations between mutations in the HIV-1 protease and drug resistance to different PI type drugs, and between mutations in the HIV-1 reverse transcriptase and drug resistance to different NRTI and NNRTI type drugs.
+
+In order to evaluate our results, we compare with the treatment-selected mutation panels created by [@rhee2005]. These panels give lists of HIV-1 mutations appearing more frequently in patients who have previously been treated with PI, NRTI, or NNRTI type drugs, than in patients with no previous exposure to that drug type. Increased frequency of a mutation among patients treated with a certain drug type implies that the mutation confers resistance to that drug type.
+
+In this vignette, we will confine our attention to the PI drugs.
+
+```{r drug-type}
+drug_class = 'PI' # Possible drug types are 'PI', 'NRTI', and 'NNRTI'. 
+```
+
+## Fetching and cleaning the data
+
+First, we download the data and read it into data frames.
+
+```{r raw-data}
+base_url = 'http://hivdb.stanford.edu/pages/published_analysis/genophenoPNAS2006'
+gene_url = paste(base_url, 'DATA', paste0(drug_class, '_DATA.txt'), sep='/')
+tsm_url = paste(base_url, 'MUTATIONLISTS', 'NP_TSM', drug_class, sep='/')
+
+gene_df = read.delim(gene_url, na.string = c('NA', ''), stringsAsFactors = FALSE)
+tsm_df = read.delim(tsm_url, header = FALSE, stringsAsFactors = FALSE)
+names(tsm_df) = c('Position', 'Mutations')
+```
+
+A small sample of the data is shown below.
+
+```{r, results='asis', echo=FALSE}
+knitr::kable(head(gene_df[,4:20]))
+knitr::kable(head(tsm_df))
+```
+
+The gene data table has some rows with error flags or nonstandard mutation codes. For simplicity, we remove all such rows.
+
+```{r cleaned-data}
+# Returns rows for which every column matches the given regular expression.
+grepl_rows <- function(pattern, df) {
+  cell_matches = apply(df, c(1,2), function(x) grepl(pattern, x))
+  apply(cell_matches, 1, all)
+}
+
+pos_start = which(names(gene_df) == 'P1')
+pos_cols = seq.int(pos_start, ncol(gene_df))
+valid_rows = grepl_rows('^(\\.|-|[A-Zid]+)$', gene_df[,pos_cols])
+gene_df = gene_df[valid_rows,]
+```
+
+## Preparing the design matrix
+
+We now construct the design matrix $X$ and matrix of response vectors $Y$. The features (columns of $X$) are given by mutation/position pairs. Define
+$$
+X_{i,j} = \text{1 if the $i$th patient has the $j$th mutation/position pair and 0 otherwise} \\
+Y_{i,j} = \text{resistance of patient $i$ to drug $j$}.
+$$
+For example, in the sample for PI type drugs, three different mutations (A, C, and D) are observed at position 63 in the protease, and so three columns of $X$ (named P63.A, P63.C, and P63.D) indicate the presence or absence of each mutation at this position.
+```{r design-matrix}
+# Flatten a matrix to a vector with names from concatenating row/column names.
+flatten_matrix <- function(M, sep='.') {
+  x <- c(M)
+  names(x) <- c(outer(rownames(M), colnames(M),
+                      function(...) paste(..., sep=sep)))
+  x
+}
+
+# Construct preliminary design matrix.
+muts = c(LETTERS, 'i', 'd')
+X = outer(muts, as.matrix(gene_df[,pos_cols]), Vectorize(grepl))
+X = aperm(X, c(2,3,1))
+dimnames(X)[[3]] <- muts
+X = t(apply(X, 1, flatten_matrix))
+mode(X) <- 'numeric'
+
+# Remove any mutation/position pairs that never appear in the data.
+X = X[,colSums(X) != 0]
+
+# Extract response matrix.
+Y = gene_df[,4:(pos_start-1)]
+```
+
+An excerpt of the design matrix is shown below. By construction, every column contains at least one 1, but the matrix is still quite sparse with the relative frequency of 1's being about `r signif(mean(X),2)`.
+```{r, results='asis', echo=FALSE}
+knitr::kable(X[1:10,1:10])
+```
+
+The response matrix looks like:
+```{r, results='asis', echo=FALSE}
+knitr::kable(head(Y))
+```
+
+Notice that there are some missing values.
+
+## Preparing the response vector
+
+The knockoff filter is designed to control the FDR under *Gaussian* noise. A quick inspection of the response vector shows that it is highly non-Gaussian.
+
+```{r small.margin=TRUE}
+hist(Y[,1], breaks='FD')
+```
+
+A log-transform seems to help considerably, so we will use the log-transformed drug resistancement measurements below.
+
+```{r small.margin=TRUE}
+hist(log(Y[,1]), breaks='FD')
+```
+
+# Running the knockoff filter
+
+We now run the knockoff filter on each drug separately. We also run the Benjamini-Hochberg (BHq) procedure for later comparison.
+
+Before running either selection procedure, we perform some final pre-processing steps. We remove rows with missing values (which vary from drug to drug) and we then further reduce the design matrix by removing predictor columns for mutations that do not appear at least three times in the sample. Finally, for identifiability, we remove any columns that are duplicates (i.e. two mutations that appear only in tandem, and therefore we cannot distinguish between their effects on the response).
+
+```{r knockoff}
+library(knockoff)
+
+knockoff_and_bhq <- function (X, y, q) {
+  # Log-transform the drug resistance measurements.
+  y = log(y)
+  
+  # Remove patients with missing measurements.
+  missing = is.na(y)
+  y = y[!missing]
+  X = X[!missing,]
+    
+  # Remove predictors that appear less than 3 times.
+  X = X[,colSums(X) >= 3]
+  
+  # Remove duplicate predictors.
+  X = X[,colSums(abs(cor(X)-1) < 1e-4) == 1]
+  
+  # Run the knockoff filter.
+  knock.gen = function(x) create.fixed(x, method='equi')
+  result = knockoff.filter(X, y, fdr=fdr, knockoffs=knock.gen, statistic=stat.glmnet_lambdasmax)
+  knockoff_selected = names(result$selected)
+  
+  # Run BHq.
+  p = ncol(X)
+  lm.fit = lm(y ~ X - 1) # no intercept
+  p.values = coef(summary(lm.fit))[,4]
+  cutoff = max(c(0, which(sort(p.values) <= fdr * (1:p) / p)))
+  bhq_selected = names(which(p.values <= fdr * cutoff / p))
+  
+  list(Knockoff = knockoff_selected, BHq = bhq_selected)
+}
+
+fdr = 0.20
+results = lapply(Y, function(y) knockoff_and_bhq(X, y, fdr))
+```
+
+For example, here are the selected variables associated with the first drug:
+```{r}
+print(results[1])
+```
+
+# Evaluating the results
+
+In this case, we are fortunate enough to have a "ground truth" obtained by another experiment. Using this, we compare the results from the knockoff and BHq procedures. Note that we compare only the position of the mutations, not the mutation type. This is because it is known that multiple mutations at the same
+protease or RT position can often be associated with related drug-resistance outcomes.
+
+```{r comparisons}
+get_position <- function(x)
+  sapply(regmatches(x, regexpr('[[:digit:]]+', x)), as.numeric)
+
+comparisons <- lapply(results, function(drug) {
+  lapply(drug, function(selected) {
+    positions = unique(get_position(selected)) # remove possible duplicates
+    discoveries = length(positions)
+    false_discoveries = length(setdiff(positions, tsm_df$Position))
+    list(true_discoveries = discoveries - false_discoveries,
+         false_discoveries = false_discoveries,
+         fdp = false_discoveries / max(1, discoveries))
+  })
+})
+```
+
+For example, here are the discoveries made by each procedure on the first drug.
+```{r}
+print(comparisons[1])
+```
+
+## Visualization
+
+Let's compare the discoveries graphically.
+
+```{r small.margin=TRUE}
+for (drug in names(comparisons)) {
+  plot_data = do.call(cbind, comparisons[[drug]])
+  plot_data = plot_data[c('true_discoveries','false_discoveries'),]
+  barplot(as.matrix(plot_data), main = paste('Resistance to', drug),
+          col = c('navy','orange'), ylim = c(0,40))
+}
+```
+
+# References

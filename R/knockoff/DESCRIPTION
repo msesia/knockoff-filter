@@ -1,0 +1,27 @@
+Package: knockoff
+Type: Package
+Title: The Knockoff Filter for Controlled Variable Selection
+Version: 0.3.0
+Date: 2017-10-16
+Authors@R: c(person("Rina", "Foygel Barber", role = c("ctb"),
+                     comment="Development of the original fixed-design Knockoffs"),
+             person("Emmanuel", "Candes", role = c("ctb"),
+                    comment="Development of Model-Free Knockoffs and original fixed-design Knockoffs"),
+             person("Lucas", "Janson", role = c("ctb"),
+                    comment="Development of Model-Free Knockoffs"),
+             person("Evan", "Patterson", role = c("aut"),
+                    comment="Original R package for the original fixed-design Knockoffs"),
+             person("Matteo", "Sesia", role = c("aut","cre"),
+                    comment="R package for Model-Free Knockoffs", email="msesia@stanford.edu"))
+Description: The knockoff filter is a general procedure for controlling the false discovery rate (FDR)
+  when performing variable selection. 
+  For more information, see the website below and the accompanying paper: Candes et al., 
+  "Panning for Gold: Model-free Knockoffs for High-dimensional Controlled Variable Selection", 
+  2016, <arXiv:1610.02351>.
+License: GPL-3
+URL: https://web.stanford.edu/group/candes/knockoffs/index.html
+Depends: methods, stats
+Imports: Rdsdp, Matrix, corpcor, glmnet, RSpectra, gtools
+Suggests: knitr, testthat, rmarkdown, lars, ranger, stabs, flare, doMC, parallel
+RoxygenNote: 6.0.1
+VignetteBuilder: knitr

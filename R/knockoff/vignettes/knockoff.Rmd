@@ -1,0 +1,158 @@
+---
+title: "Controlled variable Selection with Model-X Knockoffs"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Controlled variable Selection with Model-X knockoffs}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+This vignette illustrates the basic usage of the `knockoff` package with Model-X knockoffs. In this scenario we assume that the distribution of the predictors is known (or that it can be well approximated), but we make no assumptions on the conditional distribution of the response.  For simplicity, we will use synthetic data constructed from a linear model such that the response only depends on a small fraction of the variables.
+
+```{r, results='hide', warning=FALSE}
+set.seed(1234)
+```
+
+```{r}
+# Problem parameters
+n = 1000          # number of observations
+p = 1000          # number of variables
+k = 60            # number of variables with nonzero coefficients
+amplitude = 4.5   # signal amplitude (for noise level = 1)
+
+# Generate the variables from a multivariate normal distribution
+mu = rep(0,p)
+rho = 0.25
+Sigma = toeplitz(rho^(0:(p-1)))
+X = matrix(rnorm(n*p),n) %*% chol(Sigma)
+
+# Generate the response from a linear model
+nonzero = sample(p, k)
+beta = amplitude * (1:p %in% nonzero) / sqrt(n)
+y.sample = function(X) X %*% beta + rnorm(n)
+y = y.sample(X)
+```
+
+First examples
+--------------
+
+To begin, we call `knockoff.filter` with all the default settings.
+```{r, results='hide', message=F, warning=F}
+library(knockoff)
+result = knockoff.filter(X, y)
+```
+We can display the results with
+```{r}
+print(result)
+```
+The default value for the target false discovery rate is 0.1. In this experiment the false discovery proportion is
+```{r}
+fdp = function(selected) sum(beta[selected] == 0) / max(1, length(selected))
+fdp(result$selected)
+```
+
+By default, the knockoff filter creates model-X second-order Gaussian knockoffs. This construction estimates from the data the mean $\mu$ and the covariance $\Sigma$ of the rows of $X$, instead of using the true parameters ($\mu, \Sigma$) from which the variables were sampled.
+
+The knockoff package also includes other knockoff construction methods, all of which have names prefixed with`knockoff.create`. In the next snippet, we generate knockoffs using the true model parameters.
+```{r}
+gaussian_knockoffs = function(X) create.gaussian(X, mu, Sigma)
+result = knockoff.filter(X, y, knockoffs=gaussian_knockoffs)
+print(result)
+```
+Now the false discovery proportion is
+```{r}
+fdp(result$selected)
+```
+
+By default, the knockoff filter uses a test statistic based on the lasso. Specifically, it uses the statistic `stat.glmnet_coefdiff`, which computes
+$$
+W_j = |Z_j| - |\tilde{Z}_j|
+$$
+where $Z_j$ and $\tilde{Z}_j$ are the lasso coefficient estimates for the 
+jth variable and its knockoff, respectively. The value of the regularization
+parameter $\lambda$ is selected by cross-validation and computed with `glmnet`.
+
+
+Several other built-in statistics are available, all of which have names prefixed with `stat`. For example, we can use statistics based on random forests. In addition to choosing different statistics, we can also vary the target FDR level (e.g. we now increase it to 0.2).
+```{r}
+result = knockoff.filter(X, y, knockoffs = gaussian_knockoffs, statistic = stat.random_forest, fdr=0.2)
+print(result)
+fdp(result$selected)
+```
+
+
+User-defined test statistics
+----------------------------
+
+In addition to using the predefined test statistics, it is also possible to use your own custom test statistics. To illustrate this functionality, we implement one of the simplest test statistics from the original knockoff filter paper, namely
+$$
+W_j = \left|X_j^\top \cdot y\right| - \left|\tilde{X}_j^\top \cdot y\right|.
+$$
+
+```{r, warning=FALSE}
+my_knockoff_stat = function(X, X_k, y) {
+  abs(t(X) %*% y) - abs(t(X_k) %*% y)
+}
+result = knockoff.filter(X, y, knockoffs = gaussian_knockoffs, statistic = my_knockoff_stat)
+print(result)
+fdp(result$selected)
+```
+
+As another example, we show how to customize the grid of $\lambda$'s used to compute the lasso path in the default test statistic.
+
+```{r, warning=FALSE}
+my_lasso_stat = function(...) stat.glmnet_coefdiff(..., nlambda=100)
+result = knockoff.filter(X, y, knockoffs = gaussian_knockoffs, statistic = my_lasso_stat)
+print(result)
+fdp(result$selected)
+```
+
+The `nlambda` parameter is passed by `stat.glmnet_coefdiff` to the `glmnet`, which is used to compute the lasso path.
+For more information about this and other parameters, see the documentation for `stat.glmnet_coefdiff` or `glmnet.glmnet`.
+
+
+User-defined knockoff generation functions
+------------------------------------------
+In addition to using the predefined procedures for construction knockoff variables, it is also possible to create your own knockoffs. To illustrate this functionality, we implement a simple wrapper for the construction of second-order Model-X knockoffs.
+
+```{r}
+create_knockoffs = function(X) {
+  create.second_order(X, shrink=T)
+}
+result = knockoff.filter(X, y, knockoffs=create_knockoffs)
+print(result)
+fdp(result$selected)
+```
+
+
+Approximate vs Full SDP knockoffs
+-----------------
+The knockoff package supports two main styles of knockoff variables, *semidefinite programming* (SDP) knockoffs (the default) and  *equi-correlated* knockoffs. Though more computationally expensive, the SDP knockoffs are statistically superior by having higher power. To create SDP knockoffs, this package relies on the R library [Rdsdp][Rdsdp] to efficiently solve the semidefinite program.
+In high-dimensional settings, this program becomes computationally intractable.
+A solution is then offered by approximate SDP (ASDP) knockoffs, which address this issue by solving a simpler relaxed problem based on a block-diagonal approximation of the covariance matrix. By default, the knockoff filter uses SDP knockoffs if $p<500$ and ASDP knockoffs otherwise.
+
+In this example we generate second-order Gaussian knockoffs using the estimated model parameters and the full SDP construction. Then, we run the knockoff filter as usual.
+```{r}
+gaussian_knockoffs = function(X) create.second_order(X, method='sdp', shrink=T)
+result = knockoff.filter(X, y, knockoffs = gaussian_knockoffs)
+print(result)
+fdp(result$selected)
+```
+
+Equi-correlated knockoffs
+-----------------
+Equicorrelated knockoffs offer a computationally cheaper alternative to SDP knockoffs, at the cost of lower statistical power.
+In this example we generate second-order Gaussian knockoffs using the estimated model parameters and the equicorrelated construction. Then we run the knockoff filter.
+```{r}
+gaussian_knockoffs = function(X) create.second_order(X, method='equi', shrink=T)
+result = knockoff.filter(X, y, knockoffs = gaussian_knockoffs)
+print(result)
+fdp(result$selected)
+```
+
+
+See also
+--------
+If you want to look inside the knockoff filter, see the [advanced vignette](advanced.html).
+If you want to see how to use knockoffs for Fixed-X variables, see the [Fixed-X vignette](fixed.html).

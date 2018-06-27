@@ -1,0 +1,13 @@
+.DS_Store
+*~
+*.DS_Store
+.Rproj.user
+.Rhistory
+*.tar.gz
+*.zip
+*.o
+*.so
+*.pdf
+*.html
+R/knockoff/man
+R/knockoff/NAMESPACE

@@ -1,0 +1,114 @@
+---
+title: "Advanced Usage of the Knockoff Filter for R"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Advanced Usage of the Knockoff Filter for R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+The function `knockoff.filter` is a wrapper around several simpler functions that
+
+1. Construct knockoff variables (various functions with prefix `create`)
+2. Compute the test statistic $W$ (various functions with prefix `stat`)
+3. Compute the threshold for variable selection (`knockoff.threshold`)
+
+These functions may be called directly if desired. The purpose of this vignette is to illustrate the flexibility of this package with some examples.
+
+```{r, results='hide', message=FALSE, warning=FALSE}
+set.seed(1234)
+library(knockoff)
+```
+
+Creating an artificial problem
+------------------------------
+Let us begin by creating some synthetic data. For simplicity, we will use synthetic data constructed from a generalized linear model such that the response only depends on a small fraction of the variables.
+
+```{r}
+# Problem parameters
+n = 1000         # number of observations
+p = 1000         # number of variables
+k = 60           # number of variables with nonzero coefficients
+amplitude = 7.5  # signal amplitude (for noise level = 1)
+
+# Generate the variables from a multivariate normal distribution
+mu = rep(0,p)
+rho = 0.10
+Sigma = toeplitz(rho^(0:(p-1)))
+X = matrix(rnorm(n*p),n) %*% chol(Sigma)
+
+# Generate the response from a logistic model and encode it as a factor.
+nonzero = sample(p, k)
+beta = amplitude * (1:p %in% nonzero) / sqrt(n)
+invlogit = function(x) exp(x) / (1+exp(x))
+y.sample = function(x) rbinom(n, prob=invlogit(x %*% beta), size=1)
+y = factor(y.sample(X), levels=c(0,1), labels=c("A","B"))
+```
+
+Looking inside the knockoff filter
+----------------------------------
+Instead of using `knockoff.filter` directly, we can run the filter manually
+by calling its main components one by one.
+
+The first step is to generate the knockoff variables for the true Gaussian distribution of the variables.
+```{r}
+X_k = create.gaussian(X, mu, Sigma)
+```
+
+Then, we compute the knockoff statistics using 10-fold cross-validated lasso
+```{r, results='hide', message=FALSE, warning=FALSE}
+W = stat.glmnet_coefdiff(X, X_k, y, nfolds=10, family="binomial")
+```
+
+Now we can compute the rejection threshold
+```{r}
+thres = knockoff.threshold(W, fdr=0.2, offset=1)
+```
+
+The final step is to select the variables
+```{r}
+selected = which(W >= thres)
+print(selected)
+```
+
+The false discovery proportion is
+```{r}
+fdp = function(selected) sum(beta[selected] == 0) / max(1, length(selected))
+fdp(selected)
+```
+
+Performing numerical simulations
+--------------------------------
+We show how to manually run the knockoff filter multiple times and compute
+average quantities. This is particularly useful to estimate the FDR
+(or the power) for a particular configuration of the knockoff filter
+on artificial problems.
+```{r}
+# Optimize the parameters needed for generating Gaussian knockoffs, 
+# by solving an SDP to minimize correlations with the original variables.
+# This calculation requires only the model parameters mu and Sigma, 
+# not the observed variables X. Therefore, there is no reason to perform it
+# more than once for our simulation.
+
+diag_s = create.solve_asdp(Sigma)
+
+# Compute the fdp over 20 iterations
+nIterations = 20
+fdp_list = sapply(1:nIterations, function(it) {
+    # Run the knockoff filter manually, using the pre-computed value of diag_s
+    X_k = create.gaussian(X, mu, Sigma, diag_s=diag_s)
+    W = stat.glmnet_lambdasmax(X, X_k, y, family="binomial")
+    t = knockoff.threshold(W, fdr=0.2, offset=1)
+    selected = which(W >= t)
+    # Compute and store the fdp
+    fdp(selected)
+  })
+# Estimate the FDR
+mean(fdp_list)
+```
+
+See also
+--------
+If you want to see some basic usage of the knockoff filter, see the [introductory vignette](knockoff.html).
+If you want to see how to use knockoffs for Fixed-X variables, see the [Fixed-X vignette](fixed.html).
