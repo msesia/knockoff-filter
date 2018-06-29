@@ -38,6 +38,8 @@ create.solve_asdp <- function(Sigma, max.size=500, gaptol=1e-6, maxit=1000, verb
   # Check that covariance matrix is symmetric
   stopifnot(isSymmetric(Sigma))
   
+  if(ncol(Sigma) <= max.size) return(create.solve_sdp(Sigma, gaptol=gaptol, maxit=maxit, verbose=verbose))
+  
   # Approximate the covariance matrix as block diagonal
   if(verbose) cat(sprintf("Dividing the problem into subproblems of size <= %s ... ", max.size))
   cluster_sol = divide.sdp(Sigma, max.size=max.size)

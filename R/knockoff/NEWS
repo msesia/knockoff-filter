@@ -1,7 +1,13 @@
-knockoff 0.3.1 (06/27/2018)
+knockoff 0.3.1.1 (06/28/2018)
 ---------------------------------------
 Minor changes:
+* Improved algorithm for solving SDP
 * Improved algorithm for solving ASDP
+* Returning X instead of throwing error in Gaussian knockoffs,
+  if covariance matrix is not positive-definite
+
+Documentation:
+* Minor improvements to package description file
 
 knockoff 0.3.0 (10/17/2017)
 ---------------------------------------

@@ -56,6 +56,12 @@ create.gaussian <- function(X, mu, Sigma, method=c("asdp","sdp","equi"), diag_s=
     diag_s = diag(diag_s,length(diag_s))
   }
   
+  # If diag_s is zero, we can only generate trivial knockoffs.
+  if(all(diag_s==0)) {
+    warning("The conditional knockoff covariance matrix is not positive definite. Knockoffs will have no power.")
+    return(X)
+  }
+  
   SigmaInv_s = solve(Sigma,diag_s)
   mu_k = X - sweep(X,2,mu,"-") %*% SigmaInv_s
   Sigma_k = 2*diag_s - diag_s %*% SigmaInv_s

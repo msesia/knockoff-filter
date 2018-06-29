@@ -7,6 +7,7 @@
 #' @param Sigma positive-definite p-by-p covariance matrix.
 #' @param maxit maximum number of iterations for the solver (default: 1000).
 #' @param gaptol tolerance for duality gap as a fraction of the value of the objective functions (default: 1e-6).
+#' @param verbose whether to display progress (default: FALSE).
 #' @return The solution \eqn{s} to the semidefinite programming problem defined above.
 #'
 #' @details
@@ -26,16 +27,16 @@
 #' @family optimization
 #' 
 #' @export
-create.solve_sdp <- function(Sigma, gaptol=1e-6, maxit=1000) {
+create.solve_sdp <- function(Sigma, gaptol=1e-6, maxit=1000, verbose=FALSE) {
   # Check that covariance matrix is symmetric
   stopifnot(isSymmetric(Sigma))
   # Convert the covariance matrix to a correlation matrix
   G = cov2cor(Sigma)
   p = dim(G)[1]
-
+  
   # Check that the input matrix is positive-definite
   if (!is_posdef(G)) {
-    stop('The covariance matrix is not positive-definite: cannot solve SDP',immediate.=T)
+    warning('The covariance matrix is not positive-definite: knockoffs may not have power.', immediate.=T)
   }
   
   # Convert problem for SCS
@@ -69,11 +70,13 @@ create.solve_sdp <- function(Sigma, gaptol=1e-6, maxit=1000) {
   OPTIONS$logsummary=0
   OPTIONS$outputstats=0
   OPTIONS$print=0
+  if(verbose) cat("Solving SDP ... ")
   sol = Rdsdp::dsdp(A,b,C,K,OPTIONS)
+  if(verbose) cat("done. \n")
   
   # Check whether the solution is feasible
   if( ! identical(sol$STATS$stype,"PDFeasible")) {
-    warning('The SDP solver returned a non-feasible solution')
+    warning('The SDP solver returned a non-feasible solution. Knockoffs may lose power.')
   }
   
   # Clip solution to correct numerical errors (domain)
@@ -82,10 +85,11 @@ create.solve_sdp <- function(Sigma, gaptol=1e-6, maxit=1000) {
   s[s>1]=1
   
   # Compensate for numerical errors (feasibility)
+  if(verbose) cat("Verifying that the solution is correct ... ")
   psd = 0
   s_eps = 1e-8
-  while (psd==0) {
-    if (is_posdef(2*G-diag(s*(1-s_eps),length(s)))) {
+  while ((psd==0) & (s_eps<=0.1)) {
+    if (is_posdef(2*G-diag(s*(1-s_eps),length(s)),tol=1e-9)) {
       psd  = 1
     }
     else {
@@ -93,10 +97,12 @@ create.solve_sdp <- function(Sigma, gaptol=1e-6, maxit=1000) {
     }
   }
   s = s*(1-s_eps)
+  s[s<0]=0
+  if(verbose) cat("done. \n")
   
   # Verify that the solution is correct
-  if (max(s)==0) {
-   warning('In creation of SDP knockoffs, procedure failed. Knockoffs will have no power.',immediate.=T)
+  if (all(s==0)) {
+    warning('In creation of SDP knockoffs, procedure failed. Knockoffs will have no power.',immediate.=T)
   }
   
   # Scale back the results for a covariance matrix

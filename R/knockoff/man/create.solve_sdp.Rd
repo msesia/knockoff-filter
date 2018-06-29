@@ -4,7 +4,7 @@
 \alias{create.solve_sdp}
 \title{Optimization for fixed-X and Gaussian knockoffs}
 \usage{
-create.solve_sdp(Sigma, gaptol = 1e-06, maxit = 1000)
+create.solve_sdp(Sigma, gaptol = 1e-06, maxit = 1000, verbose = FALSE)
 }
 \arguments{
 \item{Sigma}{positive-definite p-by-p covariance matrix.}
@@ -12,6 +12,8 @@ create.solve_sdp(Sigma, gaptol = 1e-06, maxit = 1000)
 \item{gaptol}{tolerance for duality gap as a fraction of the value of the objective functions (default: 1e-6).}
 
 \item{maxit}{maximum number of iterations for the solver (default: 1000).}
+
+\item{verbose}{whether to display progress (default: FALSE).}
 }
 \value{
 The solution \eqn{s} to the semidefinite programming problem defined above.
