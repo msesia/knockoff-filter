@@ -65,10 +65,20 @@
 #' @rdname stat.glmnet_lambdadiff
 #' @export
 stat.glmnet_lambdadiff <- function(X, X_k, y, family='gaussian', ...) {
-  Z = lasso_max_lambda(cbind(X, X_k), y, method='glmnet', family=family, ...)
+  # Randomly swap columns of X and Xk
+  swap = rbinom(ncol(X),1,0.5)
+  swap.M = matrix(swap,nrow=nrow(X),ncol=length(swap),byrow=TRUE)
+  X.swap  = X * (1-swap.M) + X_k * swap.M
+  Xk.swap = X * swap.M + X_k * (1-swap.M)
+  
+  # Compute statistics
+  Z = lasso_max_lambda(cbind(X.swap, Xk.swap), y, method='glmnet', family=family, ...)
   p = ncol(X)
   orig = 1:p
-  Z[orig] - Z[orig+p]
+  W = Z[orig] - Z[orig+p]
+  
+  # Correct for swapping of columns of X and Xk
+  W = W * (1-2*swap)
 }
 
 #' GLM statistics for knockoff
@@ -132,10 +142,20 @@ stat.glmnet_lambdadiff <- function(X, X_k, y, family='gaussian', ...) {
 #' @rdname stat.glmnet_lambdasmax
 #' @export
 stat.glmnet_lambdasmax <- function(X, X_k, y, family='gaussian', ...) {
-  Z = lasso_max_lambda(cbind(X, X_k), y, method='glmnet', family=family, ...)
+  # Randomly swap columns of X and Xk
+  swap = rbinom(ncol(X),1,0.5)
+  swap.M = matrix(swap,nrow=nrow(X),ncol=length(swap),byrow=TRUE)
+  X.swap  = X * (1-swap.M) + X_k * swap.M
+  Xk.swap = X * swap.M + X_k * (1-swap.M)
+  
+  # Compute statistics
+  Z = lasso_max_lambda(cbind(X.swap, Xk.swap), y, method='glmnet', family=family, ...)
   p = ncol(X)
   orig = 1:p
-  pmax(Z[orig], Z[orig+p]) * sign(Z[orig] - Z[orig+p])
+  W = pmax(Z[orig], Z[orig+p]) * sign(Z[orig] - Z[orig+p])
+  
+  # Correct for swapping of columns of X and Xk
+  W = W * (1-2*swap)
 }
 
 #' @keywords internal
@@ -159,7 +179,7 @@ lasso_max_lambda_glmnet <- function(X, y, nlambda=500, intercept=T, standardize=
   
   # Standardize the variables
   if( standardize ){
-    X = normc(X)
+    X = scale(X)
   }
     
   n = nrow(X); p = ncol(X)

@@ -52,12 +52,23 @@ stat.forward_selection <- function(X, X_k, y, omp=F) {
     stop('Knockoff statistic stat.forward_selection requires the input y to be a numeric vector')
   }
   p = ncol(X)
-  X = normc(X)
-  X_k = normc(X_k)
-  path = fs(cbind(X, X_k), y, omp)
+  X = scale(X)
+  X_k = scale(X_k)
+  
+  # Randomly swap columns of X and Xk
+  swap = rbinom(ncol(X),1,0.5)
+  swap.M = matrix(swap,nrow=nrow(X),ncol=length(swap),byrow=TRUE)
+  X.swap  = X * (1-swap.M) + X_k * swap.M
+  Xk.swap = X * swap.M + X_k * (1-swap.M)
+  
+  # Compute statistics
+  path = fs(cbind(X.swap, Xk.swap), y, omp)
   Z = 2*p + 1 - order(path)
   orig = 1:p
-  pmax(Z[orig], Z[orig+p]) * sign(Z[orig] - Z[orig+p])
+  W = pmax(Z[orig], Z[orig+p]) * sign(Z[orig] - Z[orig+p])
+  
+  # Correct for swapping of columns of X and Xk
+  W = W * (1-2*swap)
 }
 
 #' Forward selection

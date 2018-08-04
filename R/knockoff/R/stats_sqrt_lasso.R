@@ -50,10 +50,20 @@ stat.sqrt_lasso <- function(X, X_k, y, ...) {
   }
   p = ncol(X)
   
-  Z = sqrt_lasso_coeffs(cbind(X, X_k), y, ...)
+  # Randomly swap columns of X and Xk
+  swap = rbinom(ncol(X),1,0.5)
+  swap.M = matrix(swap,nrow=nrow(X),ncol=length(swap),byrow=TRUE)
+  X.swap  = X * (1-swap.M) + X_k * swap.M
+  Xk.swap = X * swap.M + X_k * (1-swap.M)
+  
+  # Compute statistics
+  Z = sqrt_lasso_coeffs(cbind(X.swap, Xk.swap), y, ...)
   p = ncol(X)
   orig = 1:p
-  pmax(Z[orig], Z[orig+p]) * sign(Z[orig] - Z[orig+p])
+  W = pmax(Z[orig], Z[orig+p]) * sign(Z[orig] - Z[orig+p])
+  
+  # Correct for swapping of columns of X and Xk
+  W = W * (1-2*swap)
 }
 
 #' SQRT lasso
@@ -66,7 +76,7 @@ stat.sqrt_lasso <- function(X, X_k, y, ...) {
 #' 
 #' @keywords internal
 sqrt_lasso_coeffs <- function(X, y, nlambda=NULL, ...) {
-  X = normc(X)
+  X = scale(X)
   n = nrow(X)
   fit = flare::slim(X, y)
   first_nonzero <- function(x) match(T, abs(x) > 0) # NA if all(x==0)

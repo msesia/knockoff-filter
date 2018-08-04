@@ -17,7 +17,6 @@ test_that('Fixed-design equicorrelated knockoffs have the right correlation stru
 
 # Test case from Weijie Su.
 test_that('equicorrelated knockoffs are created in numerically sensitive case', {
-
   n = 15; p = 5
   M = matrix(0, p, p)
   diag(M) = 1

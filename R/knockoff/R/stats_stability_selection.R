@@ -55,10 +55,21 @@ stat.stability_selection <- function(X, X_k, y, fitfun = stabs::glmnet.lasso, ..
   if (!is.vector(y)) {
     stop('Knockoff statistic stat.stability_selection requires the input y to be a vector')
   }
-  Z = stability_selection_importance(cbind(X, X_k), y, fitfun=fitfun, ...)
+  
+  # Randomly swap columns of X and Xk
+  swap = rbinom(ncol(X),1,0.5)
+  swap.M = matrix(swap,nrow=nrow(X),ncol=length(swap),byrow=TRUE)
+  X.swap  = X * (1-swap.M) + X_k * swap.M
+  Xk.swap = X * swap.M + X_k * (1-swap.M)
+  
+  # Compute statistics
+  Z = stability_selection_importance(cbind(X.swap, Xk.swap), y, fitfun=fitfun, ...)
   p = ncol(X)
   orig = 1:p
-  abs(Z[orig]) - abs(Z[orig+p])
+  W = abs(Z[orig]) - abs(Z[orig+p])
+  
+  # Correct for swapping of columns of X and Xk
+  W = W * (1-2*swap)
 }
 
 #' Stability selection
@@ -71,7 +82,7 @@ stat.stability_selection <- function(X, X_k, y, fitfun = stabs::glmnet.lasso, ..
 #' 
 #' @keywords internal
 stability_selection_importance <- function(X, y, ...) {
-  X = normc(X)
+  X = scale(X)
   
   if (!methods::hasArg(cutoff) ) {
     cutoff = 0.75

@@ -108,17 +108,26 @@ stat.glmnet_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
     }
   }
   
+  # Randomly swap columns of X and Xk
+  swap = rbinom(ncol(X),1,0.5)
+  swap.M = matrix(swap,nrow=nrow(X),ncol=length(swap),byrow=TRUE)
+  X.swap  = X * (1-swap.M) + X_k * swap.M
+  Xk.swap = X * swap.M + X_k * (1-swap.M)
+  
   # Compute statistics
-  Z = cv_coeffs_glmnet(cbind(X, X_k), y, family=family, parallel=parallel, ...)
+  Z = cv_coeffs_glmnet(cbind(X.swap, Xk.swap), y, family=family, parallel=parallel, ...)
   p = ncol(X)
   orig = 1:p
-  abs(Z[orig]) - abs(Z[orig+p])
+  W = abs(Z[orig]) - abs(Z[orig+p])
+  
+  # Correct for swapping of columns of X and Xk
+  W = W * (1-2*swap)
 }
 
 #' @keywords internal
 cv_coeffs_glmnet <- function(X, y, nlambda=500, intercept=T, parallel=T, ...) {
   # Standardize variables
-  X = normc(X)
+  X = scale(X)
   
   n = nrow(X); p = ncol(X)
   n = nrow(X); p = ncol(X)

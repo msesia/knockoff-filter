@@ -1,3 +1,12 @@
+knockoff 0.3.2 (08/03/2018)
+---------------------------------------
+Fixes:
+* Fixed bug that caused incorrect knockoff statistics in the presence
+  of knockoff copies identical to their own original variable.
+
+Minor changes:
+* Changed scaling of variables for computation of importance measures.
+
 knockoff 0.3.1.1 (06/28/2018)
 ---------------------------------------
 Minor changes:

@@ -48,10 +48,20 @@ stat.random_forest <- function(X, X_k, y, ...) {
   if (!requireNamespace('ranger', quietly=T))
     stop('ranger is not installed', call.=F)
   
-  Z = random_forest_importance(cbind(X, X_k), y) 
+  # Randomly swap columns of X and Xk
+  swap = rbinom(ncol(X),1,0.5)
+  swap.M = matrix(swap,nrow=nrow(X),ncol=length(swap),byrow=TRUE)
+  X.swap  = X * (1-swap.M) + X_k * swap.M
+  Xk.swap = X * swap.M + X_k * (1-swap.M)
+  
+  # Compute statistics
+  Z = random_forest_importance(cbind(X.swap, Xk.swap), y) 
   p = ncol(X)
   orig = 1:p
-  abs(Z[orig]) - abs(Z[orig+p])
+  W = abs(Z[orig]) - abs(Z[orig+p])
+  
+  # Correct for swapping of columns of X and Xk
+  W = W * (1-2*swap)
 }
 
 #' @keywords internal

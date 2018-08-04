@@ -151,7 +151,7 @@ knockoff.filter <- function(X, y,
   
   # Run the knockoff filter
   t = knockoff.threshold(W, fdr=fdr, offset=offset)
-  selected = which(W >= t)
+  selected = sort(which(W >= t))
   if (!is.null(X.names))
     names(selected) = X.names[selected]
   

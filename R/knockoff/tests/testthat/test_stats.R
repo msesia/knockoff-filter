@@ -32,7 +32,6 @@ test_that('Finding the max lambda in lasso works for orthonormal design', {
   y = X %*% beta + rnorm(n)
     
   beta_ls = as.vector(t(X) %*% y)
-#  expect_equal(lasso_max_lambda_lars(X, y), abs(beta_ls))
   expect_equal(lasso_max_lambda_glmnet(X, y, nlambda = 1e4, intercept=F, standardize=F), abs(beta_ls),
                tolerance = 1e-3)
 })
