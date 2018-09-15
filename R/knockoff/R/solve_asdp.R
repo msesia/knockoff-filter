@@ -159,8 +159,8 @@ divide.sdp <- function(Sigma, max.size) {
   clusters = clusters.new
   
   # Create covariance submatrices for each cluster
-  subSigma = vector("list", n.blocks) 
-  for( k in 1:n.blocks ) {
+  subSigma = vector("list", max(clusters)) 
+  for( k in 1:length(subSigma) ) {
     indices_k = clusters==k
     subSigma[[k]] = Sigma[indices_k,indices_k]
   }
