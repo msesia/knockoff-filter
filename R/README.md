@@ -21,21 +21,19 @@ You can install the lastest development version by cloning this repository and b
 To install this package with devtools, run the following command in your R console:
 
 ```r
-library(devtools)
-install_github("msesia/knockoff-filter/R/knockoff")
+devtools::install_github("msesia/knockoff-filter/R/knockoff")
 ```
 
 If you also want install the vignettes along with the package, type instead:
 
 ```r
-install_github("msesia/knockoff-filter/R/knockoff", build_vignette = TRUE)
+devtools::install_github("msesia/knockoff-filter/R/knockoff", build_vignette = TRUE)
 ```
 
 Note that building the vignettes may require additional R packages.
 
 ## Resources
-For more information and tutorials, visit
-https://web.stanford.edu/group/candes/knockoffs/software/knockoffs/download-r.html
+For more information, visit: https://web.stanford.edu/group/candes/knockoffs
 
 ## News
 

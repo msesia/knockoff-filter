@@ -66,8 +66,7 @@ is the collection of examples in the "examples" subdirectory.
 The file "examples_basic.m" is a good place to start.
 
 ## Resources
-For more information and tutorials, visit
-https://web.stanford.edu/group/candes/knockoffs/software/knockoffs/download-matlab.html
+For more information, visit: https://web.stanford.edu/group/candes/knockoffs
 
 ## Credits
 
