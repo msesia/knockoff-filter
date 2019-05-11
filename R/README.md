@@ -22,20 +22,20 @@ To install this package with devtools, run the following command in your R conso
 
 ```r
 library(devtools)
-install_bitbucket("msesia/knockoff-filter/R/knockoff")
+install_github("msesia/knockoff-filter/R/knockoff")
 ```
 
 If you also want install the vignettes along with the package, type instead:
 
 ```r
-install_bitbucket("msesia/knockoff-filter/R/knockoff", build_vignette = TRUE)
+install_github("msesia/knockoff-filter/R/knockoff", build_vignette = TRUE)
 ```
 
 Note that building the vignettes may require additional R packages.
 
 ## Resources
 For more information and tutorials, visit
-https://web.stanford.edu/group/candes/knockoffs/software/knockoff/download-r.html
+https://web.stanford.edu/group/candes/knockoffs/software/knockoffs/download-r.html
 
 ## News
 

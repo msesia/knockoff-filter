@@ -67,7 +67,7 @@ The file "examples_basic.m" is a good place to start.
 
 ## Resources
 For more information and tutorials, visit
-https://web.stanford.edu/group/candes/knockoffs/software/knockoff/download-matlab.html
+https://web.stanford.edu/group/candes/knockoffs/software/knockoffs/download-matlab.html
 
 ## Credits
 
