@@ -12,12 +12,12 @@
 #' @param ... additional arguments specific to \code{slim}.
 #' @return A vector of statistics \eqn{W} of length p.
 #' 
-#' @details With default parameters, this function uses the package \code{flare}
+#' @details With default parameters, this function uses the package \code{RPtests}
 #' to run the SQRT lasso. By specifying the appropriate optional parameters, 
 #' one can use different Lasso variants including Dantzig Selector, LAD Lasso,
 #' SQRT Lasso and Lq Lasso for estimating high dimensional sparse linear models.
 #' 
-#' For a complete list of the available additional arguments, see \code{\link[flare]{slim}}.
+#' For a complete list of the available additional arguments, see \code{\link[RPtests]{sqrt_lasso}}.
 #' 
 #' @family statistics
 #' 
@@ -43,8 +43,8 @@
 #' @rdname stat.sqrt_lasso
 #' @export
 stat.sqrt_lasso <- function(X, X_k, y, ...) {
-  if (!requireNamespace('flare', quietly=T))
-    stop('flare is not installed', call.=F)
+  if (!requireNamespace('RPtests', quietly=T))
+    stop('RPtests is not installed', call.=F)
   if (!(is.vector(y) && is.numeric(y)))  {
     stop('Knockoff statistic stat.sqrt_lasso requires the input y to be a numeric vector')
   }
@@ -57,30 +57,11 @@ stat.sqrt_lasso <- function(X, X_k, y, ...) {
   Xk.swap = X * swap.M + X_k * (1-swap.M)
   
   # Compute statistics
-  Z = sqrt_lasso_coeffs(cbind(X.swap, Xk.swap), y, ...)
+  Z = RPtests::sqrt_lasso(cbind(X.swap, Xk.swap), as.numeric(y), ...)
   p = ncol(X)
   orig = 1:p
   W = pmax(Z[orig], Z[orig+p]) * sign(Z[orig] - Z[orig+p])
   
   # Correct for swapping of columns of X and Xk
   W = W * (1-2*swap)
-}
-
-#' SQRT lasso
-#' 
-#' Perform variable selection with SQRT lasso
-#' 
-#' @param X matrix of predictors
-#' @param y response vector
-#' @return vector with jth component the selection probability of variable j
-#' 
-#' @keywords internal
-sqrt_lasso_coeffs <- function(X, y, nlambda=NULL, ...) {
-  X = scale(X)
-  n = nrow(X)
-  fit = flare::slim(X, y)
-  first_nonzero <- function(x) match(T, abs(x) > 0) # NA if all(x==0)
-  indices <- apply(fit$beta, 1, first_nonzero)
-  names(indices) <- NULL
-  ifelse(is.na(indices), 0, fit$lambda[indices] * n)
 }

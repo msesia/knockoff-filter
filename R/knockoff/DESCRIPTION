@@ -1,8 +1,8 @@
 Package: knockoff
 Type: Package
 Title: The Knockoff Filter for Controlled Variable Selection
-Version: 0.3.2
-Date: 2018-09-15
+Version: 0.3.3
+Date: 2020-06-01
 Authors@R: c(person("Rina", "Foygel Barber", role = c("ctb"),
                      comment="Development of the original Fixed-X Knockoffs"),
              person("Emmanuel", "Candes", role = c("ctb"),
@@ -12,16 +12,16 @@ Authors@R: c(person("Rina", "Foygel Barber", role = c("ctb"),
              person("Evan", "Patterson", role = c("aut"),
                     comment="Original R package for the original Fixed-X Knockoffs"),
              person("Matteo", "Sesia", role = c("aut","cre"),
-                    comment="R package for Model-X Knockoffs", email="msesia@stanford.edu"))
+                    comment="R package for Model-X Knockoffs", email="sesia@usc.edu"))
 Description: The knockoff filter is a general procedure for controlling the false discovery rate (FDR)
   when performing variable selection. 
   For more information, see the website below and the accompanying paper: Candes et al., 
-  "Panning for Gold: Model-X Knockoffs for High-dimensional Controlled Variable Selection", 
-  2016, <arXiv:1610.02351>.
+  "Panning for gold: model-X knockoffs for high-dimensional controlled variable selection", 
+  J. R. Statist. Soc. B (2018) 80, 3, pp. 551-577.
 License: GPL-3
 URL: https://web.stanford.edu/group/candes/knockoffs/index.html
 Depends: methods, stats
 Imports: Rdsdp, Matrix, corpcor, glmnet, RSpectra, gtools, utils
-Suggests: knitr, testthat, rmarkdown, lars, ranger, stabs, flare, doMC, parallel
+Suggests: knitr, testthat, rmarkdown, lars, ranger, stabs, RPtests, doMC, parallel
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
