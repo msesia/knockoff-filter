@@ -10,7 +10,7 @@ Authors@R: c(person("Rina", "Foygel Barber", role = c("ctb"),
              person("Lucas", "Janson", role = c("ctb"),
                     comment="Development of Model-X Knockoffs"),
              person("Evan", "Patterson", role = c("aut"),
-                    comment="Original R package for the original Fixed-X Knockoffs"),
+                    comment="Earlier R package for the original Fixed-X Knockoffs"),
              person("Matteo", "Sesia", role = c("aut","cre"),
                     comment="R package for Model-X Knockoffs", email="sesia@usc.edu"))
 Description: The knockoff filter is a general procedure for controlling the false discovery rate (FDR)
@@ -23,5 +23,5 @@ URL: https://web.stanford.edu/group/candes/knockoffs/index.html
 Depends: methods, stats
 Imports: Rdsdp, Matrix, corpcor, glmnet, RSpectra, gtools, utils
 Suggests: knitr, testthat, rmarkdown, lars, ranger, stabs, RPtests, doMC, parallel
-RoxygenNote: 6.0.1
+RoxygenNote: 7.1.0
 VignetteBuilder: knitr

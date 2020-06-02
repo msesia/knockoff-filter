@@ -38,6 +38,8 @@ solving the SDP defined above. The result is then scaled back before being retur
 the original scaling of the covariance matrix supplied by the user.
 }
 \seealso{
-Other optimization: \code{\link{create.solve_asdp}},
-  \code{\link{create.solve_equi}}
+Other optimization: 
+\code{\link{create.solve_asdp}()},
+\code{\link{create.solve_equi}()}
 }
+\concept{optimization}

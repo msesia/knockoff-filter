@@ -4,8 +4,13 @@
 \alias{create.solve_asdp}
 \title{Relaxed optimization for fixed-X and Gaussian knockoffs}
 \usage{
-create.solve_asdp(Sigma, max.size = 500, gaptol = 1e-06, maxit = 1000,
-  verbose = FALSE)
+create.solve_asdp(
+  Sigma,
+  max.size = 500,
+  gaptol = 1e-06,
+  maxit = 1000,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{Sigma}{positive-definite p-by-p covariance matrix.}
@@ -48,6 +53,8 @@ solving the SDP defined above. The result is then scaled back before being retur
 the original scaling of the covariance matrix supplied by the user.
 }
 \seealso{
-Other optimization: \code{\link{create.solve_equi}},
-  \code{\link{create.solve_sdp}}
+Other optimization: 
+\code{\link{create.solve_equi}()},
+\code{\link{create.solve_sdp}()}
 }
+\concept{optimization}

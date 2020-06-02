@@ -27,6 +27,8 @@ used to generate equi-correlated knockoffs.
 The closed form-solution to this problem is \eqn{s = 2\lambda_{\mathrm{min}}(\Sigma) \land 1}.
 }
 \seealso{
-Other optimization: \code{\link{create.solve_asdp}},
-  \code{\link{create.solve_sdp}}
+Other optimization: 
+\code{\link{create.solve_asdp}()},
+\code{\link{create.solve_sdp}()}
 }
+\concept{optimization}

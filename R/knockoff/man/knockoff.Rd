@@ -3,9 +3,6 @@
 \docType{package}
 \name{knockoff}
 \alias{knockoff}
-\alias{knockoff-package}
-\alias{knockoff}
-\alias{knockoff-package}
 \title{knockoff: A package for controlled variable selection}
 \description{
 This package implements the Knockoff Filter, which is a powerful and versatile tool for 

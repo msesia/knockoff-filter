@@ -28,7 +28,7 @@
 #' @family statistics
 #' 
 #' @examples
-#' p=100; n=100; k=15
+#' p=50; n=50; k=15
 #' mu = rep(0,p); Sigma = diag(p)
 #' X = matrix(rnorm(n*p),n)
 #' nonzero = sample(p, k)
@@ -38,14 +38,9 @@
 #' 
 #' # Basic usage with default arguments
 #' result = knockoff.filter(X, y, knockoffs=knockoffs,
-#'                            statistic=stat.stability_selection)
+#'                          statistic=stat.stability_selection)
 #' print(result$selected)
 #' 
-#' # Advanced usage with custom arguments
-#' foo = stat.stability_selection
-#' k_stat = function(X, X_k, y) foo(X, X_k, y, fitfun=stabs::lars.lasso)
-#' result = knockoff.filter(X, y, knockoffs=knockoffs, statistic=k_stat)
-#' print(result$selected)
 #' 
 #' @rdname stat.stability_selection
 #' @export

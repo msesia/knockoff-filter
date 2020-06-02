@@ -1,3 +1,8 @@
+knockoff 0.3.3 (06/01/2020)
+---------------------------------------
+Minor changes:
+* Removed dependency on flare, which is no longer on CRAN.
+
 knockoff 0.3.2 (08/03/2018)
 ---------------------------------------
 Fixes:

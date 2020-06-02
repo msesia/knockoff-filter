@@ -4,8 +4,14 @@
 \alias{knockoff.filter}
 \title{The Knockoff Filter}
 \usage{
-knockoff.filter(X, y, knockoffs = create.second_order,
-  statistic = stat.glmnet_coefdiff, fdr = 0.1, offset = 1)
+knockoff.filter(
+  X,
+  y,
+  knockoffs = create.second_order,
+  statistic = stat.glmnet_coefdiff,
+  fdr = 0.1,
+  offset = 1
+)
 }
 \arguments{
 \item{X}{n-by-p matrix or data frame of predictors.}

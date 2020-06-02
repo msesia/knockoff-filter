@@ -4,8 +4,13 @@
 \alias{create.fixed}
 \title{Fixed-X knockoffs}
 \usage{
-create.fixed(X, method = c("sdp", "equi"), sigma = NULL, y = NULL,
-  randomize = F)
+create.fixed(
+  X,
+  method = c("sdp", "equi"),
+  sigma = NULL,
+  y = NULL,
+  randomize = F
+)
 }
 \arguments{
 \item{X}{normalized n-by-p matrix of original variables.(\eqn{n \geq p}).}
@@ -61,6 +66,8 @@ Barber and Candes,
   \href{https://projecteuclid.org/euclid.aos/1438606853}{https://projecteuclid.org/euclid.aos/1438606853}
 }
 \seealso{
-Other create: \code{\link{create.gaussian}},
-  \code{\link{create.second_order}}
+Other create: 
+\code{\link{create.gaussian}()},
+\code{\link{create.second_order}()}
 }
+\concept{create}

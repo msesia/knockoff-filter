@@ -1,2 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^knockoff\.Rcheck$
+^knockoff.*\.tar\.gz$
+^knockoff.*\.tgz$

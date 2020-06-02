@@ -4,8 +4,7 @@
 \alias{create.gaussian}
 \title{Model-X Gaussian knockoffs}
 \usage{
-create.gaussian(X, mu, Sigma, method = c("asdp", "sdp", "equi"),
-  diag_s = NULL)
+create.gaussian(X, mu, Sigma, method = c("asdp", "sdp", "equi"), diag_s = NULL)
 }
 \arguments{
 \item{X}{n-by-p matrix of original variables.}
@@ -52,6 +51,8 @@ Candes et al., Panning for Gold: Model-free Knockoffs for High-dimensional Contr
   \href{https://web.stanford.edu/group/candes/knockoffs/index.html}{https://web.stanford.edu/group/candes/knockoffs/index.html}
 }
 \seealso{
-Other create: \code{\link{create.fixed}},
-  \code{\link{create.second_order}}
+Other create: 
+\code{\link{create.fixed}()},
+\code{\link{create.second_order}()}
 }
+\concept{create}

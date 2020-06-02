@@ -55,6 +55,8 @@ Candes et al., Panning for Gold: Model-free Knockoffs for High-dimensional Contr
   \href{https://web.stanford.edu/group/candes/knockoffs/index.html}{https://web.stanford.edu/group/candes/knockoffs/index.html}
 }
 \seealso{
-Other create: \code{\link{create.fixed}},
-  \code{\link{create.gaussian}}
+Other create: 
+\code{\link{create.fixed}()},
+\code{\link{create.gaussian}()}
 }
+\concept{create}

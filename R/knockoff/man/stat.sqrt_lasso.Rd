@@ -26,12 +26,12 @@ where \eqn{Z_j} and \eqn{\tilde{Z}_j} are the maximum values of
 enter the SQRT lasso model.
 }
 \details{
-With default parameters, this function uses the package \code{flare}
+With default parameters, this function uses the package \code{RPtests}
 to run the SQRT lasso. By specifying the appropriate optional parameters, 
 one can use different Lasso variants including Dantzig Selector, LAD Lasso,
 SQRT Lasso and Lq Lasso for estimating high dimensional sparse linear models.
 
-For a complete list of the available additional arguments, see \code{\link[flare]{slim}}.
+For a complete list of the available additional arguments, see \code{\link[RPtests]{sqrt_lasso}}.
 }
 \examples{
 p=50; n=50; k=10
@@ -54,13 +54,15 @@ print(result$selected)
 
 }
 \seealso{
-Other statistics: \code{\link{stat.forward_selection}},
-  \code{\link{stat.glmnet_coefdiff}},
-  \code{\link{stat.glmnet_lambdadiff}},
-  \code{\link{stat.lasso_coefdiff_bin}},
-  \code{\link{stat.lasso_coefdiff}},
-  \code{\link{stat.lasso_lambdadiff_bin}},
-  \code{\link{stat.lasso_lambdadiff}},
-  \code{\link{stat.random_forest}},
-  \code{\link{stat.stability_selection}}
+Other statistics: 
+\code{\link{stat.forward_selection}()},
+\code{\link{stat.glmnet_coefdiff}()},
+\code{\link{stat.glmnet_lambdadiff}()},
+\code{\link{stat.lasso_coefdiff_bin}()},
+\code{\link{stat.lasso_coefdiff}()},
+\code{\link{stat.lasso_lambdadiff_bin}()},
+\code{\link{stat.lasso_lambdadiff}()},
+\code{\link{stat.random_forest}()},
+\code{\link{stat.stability_selection}()}
 }
+\concept{statistics}
