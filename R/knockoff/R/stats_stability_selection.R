@@ -21,7 +21,7 @@
 #' variable selection stability. The selection stability of the j-th 
 #' variable is defined as its probability of being selected upon random
 #' subsampling of the data. The default method for selecting variables 
-#' in each subsampled dataset is \code{\link[stabs]{glmnet.lasso_maxCoef}}.
+#' in each subsampled dataset is \code{\link[stabs]{lars.lasso}}.
 #' 
 #' For a complete list of the available additional arguments, see \code{\link[stabs]{stabsel}}. 
 #' 
@@ -44,7 +44,7 @@
 #' 
 #' @rdname stat.stability_selection
 #' @export
-stat.stability_selection <- function(X, X_k, y, fitfun = stabs::glmnet.lasso, ...) {
+stat.stability_selection <- function(X, X_k, y, fitfun = stabs::lars.lasso, ...) {
   if (!requireNamespace('stabs', quietly=T))
     stop('stabs is not installed', call.=F)
   if (!is.vector(y)) {
