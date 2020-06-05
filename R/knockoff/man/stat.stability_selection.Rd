@@ -4,7 +4,7 @@
 \alias{stat.stability_selection}
 \title{Importance statistics based on stability selection}
 \usage{
-stat.stability_selection(X, X_k, y, fitfun = stabs::glmnet.lasso, ...)
+stat.stability_selection(X, X_k, y, fitfun = stabs::lars.lasso, ...)
 }
 \arguments{
 \item{X}{n-by-p matrix of original variables.}
@@ -36,7 +36,7 @@ This function uses the \code{stabs} package to compute
 variable selection stability. The selection stability of the j-th 
 variable is defined as its probability of being selected upon random
 subsampling of the data. The default method for selecting variables 
-in each subsampled dataset is \code{\link[stabs]{glmnet.lasso_maxCoef}}.
+in each subsampled dataset is \code{\link[stabs]{lars.lasso}}.
 
 For a complete list of the available additional arguments, see \code{\link[stabs]{stabsel}}.
 }
