@@ -1,3 +1,9 @@
+knockoff 0.3.4 (02/18/2021)
+---------------------------------------
+Minor changes:
+* Fixed bug in stat.glmnet_coefdiff and stat.glmnet_lambdadiff, 
+  which did not previously work with "multinomial" family
+
 knockoff 0.3.3 (06/01/2020)
 ---------------------------------------
 Minor changes:

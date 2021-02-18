@@ -202,11 +202,15 @@ lasso_max_lambda_glmnet <- function(X, y, nlambda=500, intercept=T, standardize=
     }
   }
 
-  fit <- glmnet::glmnet(X, y, lambda=lambda, intercept=intercept, 
-                        standardize=F, standardize.response=F, ...)
+  fit <- glmnet::glmnet(X, y, lambda=lambda, intercept=intercept, standardize=F, standardize.response=F, ...)
   
   first_nonzero <- function(x) match(T, abs(x) > 0) # NA if all(x==0)
-  indices <- apply(fit$beta, 1, first_nonzero)
+  if(family=="multinomial") {
+      indices <- sapply(fit$beta, function(beta) apply(beta, 1, first_nonzero))
+      indices <- apply(indices, 1, min)
+  } else {
+      indices <- apply(fit$beta, 1, first_nonzero)
+  }
   names(indices) <- NULL
   ifelse(is.na(indices), 0, fit$lambda[indices] * n)
 }

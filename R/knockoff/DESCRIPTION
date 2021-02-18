@@ -1,8 +1,8 @@
 Package: knockoff
 Type: Package
 Title: The Knockoff Filter for Controlled Variable Selection
-Version: 0.3.3
-Date: 2020-06-01
+Version: 0.3.4
+Date: 2021-02-18
 Authors@R: c(person("Rina", "Foygel Barber", role = c("ctb"),
                      comment="Development of the original Fixed-X Knockoffs"),
              person("Emmanuel", "Candes", role = c("ctb"),
@@ -23,5 +23,5 @@ URL: https://web.stanford.edu/group/candes/knockoffs/index.html
 Depends: methods, stats
 Imports: Rdsdp, Matrix, corpcor, glmnet, RSpectra, gtools, utils
 Suggests: knitr, testthat, rmarkdown, lars, ranger, stabs, RPtests, doMC, parallel
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr
