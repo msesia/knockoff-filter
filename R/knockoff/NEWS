@@ -1,4 +1,4 @@
-knockoff 0.3.4 (02/18/2021)
+knockoff 0.3.4 (03/08/2021)
 ---------------------------------------
 Minor changes:
 * Fixed bug in stat.glmnet_coefdiff and stat.glmnet_lambdadiff, 

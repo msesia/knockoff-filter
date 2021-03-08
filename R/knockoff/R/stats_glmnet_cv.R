@@ -113,7 +113,9 @@ stat.glmnet_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
   swap.M = matrix(swap,nrow=nrow(X),ncol=length(swap),byrow=TRUE)
   X.swap  = X * (1-swap.M) + X_k * swap.M
   Xk.swap = X * swap.M + X_k * (1-swap.M)
-  
+
+  p = ncol(X)
+
   # Compute statistics
   glmnet.coefs = cv_coeffs_glmnet(cbind(X.swap, Xk.swap), y, family=family, parallel=parallel, ...)
   if(family=="multinomial") {
@@ -124,7 +126,6 @@ stat.glmnet_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
   } else {
       Z <- glmnet.coefs[2:(2*p+1)]
   }
-  p = ncol(X)
   orig = 1:p
   W = abs(Z[orig]) - abs(Z[orig+p])
   
@@ -137,7 +138,6 @@ cv_coeffs_glmnet <- function(X, y, nlambda=500, intercept=T, parallel=T, ...) {
   # Standardize variables
   X = scale(X)
   
-  n = nrow(X); p = ncol(X)
   n = nrow(X); p = ncol(X)
   
   if (!methods::hasArg(family) ) family = "gaussian"
