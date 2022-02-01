@@ -22,6 +22,7 @@
 #' @family statistics
 #' 
 #' @examples
+#' set.seed(2022)
 #' p=50; n=50; k=10
 #' mu = rep(0,p); Sigma = diag(p)
 #' X = matrix(rnorm(n*p),n)

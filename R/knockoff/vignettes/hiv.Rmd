@@ -18,7 +18,7 @@ In this vignette, we illustrate the analysis of a real (non-simulated) data set,
 
 The scientific goal is to determine which mutations of the Human Immunodeficiency Virus Type 1 (HIV-1) are associated with drug resistance. The data set, publicly available from the [Stanford HIV Drug Resistance Database][hivdb], was originally analyzed in [@rhee2006]. The analysis described here is exactly that carried out for the knockoff filter paper [@barber2014].
 
-[hivdb]: http://hivdb.stanford.edu/pages/published_analysis/genophenoPNAS2006/
+[hivdb]: https://hivdb.stanford.edu/pages/published_analysis/genophenoPNAS2006/
 
 # Preparing the data
 

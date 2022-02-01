@@ -19,6 +19,7 @@
 #'   \href{https://web.stanford.edu/group/candes/knockoffs/index.html}{https://web.stanford.edu/group/candes/knockoffs/index.html}
 #' 
 #' @examples
+#' set.seed(2022)
 #' p=200; n=100; k=15
 #' rho = 0.4
 #' mu = rep(0,p); Sigma = toeplitz(rho^(0:(p-1)))

@@ -43,6 +43,7 @@ In particular, the default statistics based on the cross-validated lasso does no
 property and should not be used with fixed-X knockoffs.
 }
 \examples{
+set.seed(2022)
 p=100; n=200; k=15
 X = matrix(rnorm(n*p),n)
 nonzero = sample(p, k)
@@ -63,7 +64,7 @@ print(result$selected)
 Barber and Candes,
   Controlling the false discovery rate via knockoffs. 
   Ann. Statist. 43 (2015), no. 5, 2055--2085.
-  \href{https://projecteuclid.org/euclid.aos/1438606853}{https://projecteuclid.org/euclid.aos/1438606853}
+  \doi{10.1214/15-AOS1337}
 }
 \seealso{
 Other create: 

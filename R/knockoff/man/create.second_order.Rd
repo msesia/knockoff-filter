@@ -31,6 +31,7 @@ Even if the argument \code{shrink} is set to F, in the case that the estimated c
 matrix is not positive-definite, this function will apply some shrinkage.
 }
 \examples{
+set.seed(2022)
 p=200; n=100; k=15
 rho = 0.4
 Sigma = toeplitz(rho^(0:(p-1)))

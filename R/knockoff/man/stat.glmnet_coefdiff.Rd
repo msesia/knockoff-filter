@@ -66,6 +66,7 @@ For a complete list of the available additional arguments, see \code{\link[glmne
 and \code{\link[glmnet]{glmnet}}.
 }
 \examples{
+set.seed(2022)
 p=200; n=100; k=15
 mu = rep(0,p); Sigma = diag(p)
 X = matrix(rnorm(n*p),n)

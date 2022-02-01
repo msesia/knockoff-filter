@@ -22,6 +22,6 @@ License: GPL-3
 URL: https://web.stanford.edu/group/candes/knockoffs/index.html
 Depends: methods, stats
 Imports: Rdsdp, Matrix, corpcor, glmnet, RSpectra, gtools, utils
-Suggests: knitr, testthat, rmarkdown, lars, ranger, stabs, RPtests, doMC, parallel
-RoxygenNote: 7.1.1
+Suggests: knitr, testthat, rmarkdown, lars, ranger, stabs, RPtests, doParallel, parallel
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr

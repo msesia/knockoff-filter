@@ -13,7 +13,7 @@ test_that('Statistics obey antisymmetry property', {
   
   expect_antisymmetric <- function(stat) {
     orig = 1:p; ko = (p+1):(2*p);
-    expect_equal(stat(G[,orig],G[,ko],y), 
+    expect_equal(stat(G[,orig],G[,ko],y),
                  stat(G_swap[,orig],G_swap[,ko],y) * ifelse(1:p %in% i, -1, 1), tolerance = 1e-3)
   }
   expect_antisymmetric(stat.forward_selection)

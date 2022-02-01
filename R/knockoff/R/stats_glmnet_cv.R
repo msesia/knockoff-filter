@@ -53,6 +53,7 @@
 #' @family statistics
 #' 
 #' @examples
+#' set.seed(2022)
 #' p=200; n=100; k=15
 #' mu = rep(0,p); Sigma = diag(p)
 #' X = matrix(rnorm(n*p),n)
@@ -78,8 +79,8 @@ stat.glmnet_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
   if (!requireNamespace('glmnet', quietly=T))
     stop('glmnet is not installed', call.=F)
   parallel=T
-  if (!requireNamespace('doMC', quietly=T)) {
-    warning('doMC is not installed. Without parallelization, the statistics will be slower to compute', call.=F,immediate.=T)
+  if (!requireNamespace('doParallel', quietly=T)) {
+    warning('doParallel is not installed. Without parallelization, the statistics will be slower to compute', call.=F,immediate.=T)
     parallel=F
   }
   if (!requireNamespace('parallel', quietly=T)) {
@@ -100,7 +101,7 @@ stat.glmnet_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
       }
     }
     if (cores>1) {
-      doMC::registerDoMC(cores=cores)
+      doParallel::registerDoParallel(cores=cores)
       parallel = TRUE
     }
     else {
@@ -133,6 +134,14 @@ stat.glmnet_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
   
   # Correct for swapping of columns of X and Xk
   W = W * (1-2*swap)
+
+  # Stop the parallel cluster (if applicable)  
+  if (parallel) {
+    if (cores>1) {
+      doParallel::stopImplicitCluster()
+    }
+  }
+  return(W)
 }
 
 #' @keywords internal
