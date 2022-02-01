@@ -1,8 +1,8 @@
 Package: knockoff
 Type: Package
 Title: The Knockoff Filter for Controlled Variable Selection
-Version: 0.3.4
-Date: 2021-02-18
+Version: 0.3.5
+Date: 2022-01-31
 Authors@R: c(person("Rina", "Foygel Barber", role = c("ctb"),
                      comment="Development of the original Fixed-X Knockoffs"),
              person("Emmanuel", "Candes", role = c("ctb"),

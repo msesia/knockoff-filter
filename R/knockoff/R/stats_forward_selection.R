@@ -63,7 +63,7 @@ stat.forward_selection <- function(X, X_k, y, omp=F) {
   
   # Compute statistics
   path = fs(cbind(X.swap, Xk.swap), y, omp)
-  Z = 2*p + 1 - order(path)
+  Z = 2*p + 1 - order(path) # Are we recycling here?
   orig = 1:p
   W = pmax(Z[orig], Z[orig+p]) * sign(Z[orig] - Z[orig+p])
   
@@ -94,7 +94,7 @@ fs <- function(X, y, omp=FALSE) {
     available_vars = which(!in_model)
     products = apply(X[,!in_model,drop=F], 2,
                      function(x) abs(sum(x * residual)))
-    best_var = available_vars[which.max(products)]
+    best_var = available_vars[which.max(products)][1]
     path[step] = best_var
     in_model[best_var] = TRUE
     
@@ -108,8 +108,9 @@ fs <- function(X, y, omp=FALSE) {
       Q[,step] = q
       residual = residual - q%*%y * q
     } 
-    else
-      residual = residual - x%*%residual * x
+    else {
+      residual = residual - as.vector(x %*% residual) * as.vector(x)
+    }
   }
   return(path)
 }

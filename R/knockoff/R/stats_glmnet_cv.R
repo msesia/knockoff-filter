@@ -123,6 +123,8 @@ stat.glmnet_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
       for(b in 2:length(glmnet.coefs)) {
           Z <- Z + abs(glmnet.coefs[[b]][2:(2*p+1)])
       }
+  } else if (family=="cox") {
+      Z <- glmnet.coefs[1:(2*p)]
   } else {
       Z <- glmnet.coefs[2:(2*p+1)]
   }

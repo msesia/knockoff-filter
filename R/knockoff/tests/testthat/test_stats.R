@@ -7,14 +7,14 @@ test_that('Statistics obey antisymmetry property', {
   G = cbind(X, Xk)
   y = prob$y
     
-  i = sort(sample(p, sample(p))) # Indices to swap.
+  i = sort(sample(p, sample(p,1))) # Indices to swap.
   G_swap = G
   G_swap[,c(i,i+p)] <- G[,c(i+p,i)]
   
   expect_antisymmetric <- function(stat) {
     orig = 1:p; ko = (p+1):(2*p);
     expect_equal(stat(G[,orig],G[,ko],y), 
-                 stat(G_swap[,orig],G_swap[,ko],y) * ifelse(1:p %in% i, -1, 1),tolerance = 1e-3)
+                 stat(G_swap[,orig],G_swap[,ko],y) * ifelse(1:p %in% i, -1, 1), tolerance = 1e-3)
   }
   expect_antisymmetric(stat.forward_selection)
   stats_fs_omp = function(X,Xk,y) stat.forward_selection(X, Xk, y, omp=FALSE)
