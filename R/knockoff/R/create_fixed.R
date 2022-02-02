@@ -22,7 +22,6 @@
 #'   Barber and Candes,
 #'   Controlling the false discovery rate via knockoffs. 
 #'   Ann. Statist. 43 (2015), no. 5, 2055--2085.
-#'   \doi{10.1214/15-AOS1337}
 #' 
 #' @details
 #' Fixed-X knockoffs assume a homoscedastic linear regression model for \eqn{Y|X}. Moreover, they only guarantee
