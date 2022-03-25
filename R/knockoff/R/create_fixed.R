@@ -3,12 +3,15 @@
 #' Creates fixed-X knockoff variables.
 #' 
 #' @param X normalized n-by-p matrix of original variables.(\eqn{n \geq p}).
+#' @param intercept Will the intercept be fitted (TRUE) or set to zero
+#' (default=FALSE).
 #' @param method either "equi" or "sdp" (default: "sdp").
 #' This determines the method that will be used to minimize the correlation between the original variables and the knockoffs.
 #' @param sigma the noise level, used to augment the data with extra rows if necessary (default: NULL).
 #' @param y vector of length n, containing the observed responses. 
 #' This is needed to estimate the noise level if the parameter \code{sigma} is not provided, 
-#' in case \eqn{p \leq n < 2p} (default: NULL).
+#' in case \eqn{p \leq n < 2p}.
+#' When \code{intercept=TRUE}, it is needed to estimate the intercept in case \eqn{p \leq n < 2p+1} (default: NULL).
 #' @param randomize whether the knockoffs are constructed deterministically or randomized (default: F).
 #' @return An object of class "knockoff.variables". This is a list 
 #'  containing at least the following components:
@@ -47,19 +50,34 @@
 #' print(result$selected) 
 #' 
 #' @export
-create.fixed <- function(X, method=c('sdp','equi'), sigma=NULL, y=NULL, randomize=F) {
+create.fixed <- function(X, intercept=F, method=c('sdp','equi'),
+                         sigma=NULL, y=NULL, randomize=F) {
   method = match.arg(method)
   
   # Validate dimensions, if using fixed-X knockoffs
   n = nrow(X); p = ncol(X)
-  if (n <= p)
-    stop('Input X must have dimensions n > p')
-  else if (n < 2*p) {
-    warning('Input X has dimensions p < n < 2p. ',
-            'Augmenting the model with extra rows.',immediate.=T)
+  if (n <= p+intercept){
+    stop(paste0('Input X must have dimensions n > p',
+                ifelse(intercept, "+1. ", ". ")))
+  } else if (n < 2*p+intercept) {
+    warning(paste0('Input X has dimensions p',
+                   ifelse(intercept, "+1 ", " "),
+                   '< n < 2p',
+                   ifelse(intercept, "+1. ", ". ")),
+            'Augmenting the model with extra rows.', immediate.=T)
+    
+    if( intercept && is.null(y) ) {
+      stop('The response variables "y" must be provided in order to augment the 
+           data with extra rows.')
+    }
+    fitted_intercept <- if(intercept){
+      unname(lm(y ~ X + 1)$coefficients[1])
+    } else{ 0 }
+    
     X.svd = svd(X, nu=n, nv=0)
     u2 = X.svd$u[,(p+1):n]
-    X = rbind(X, matrix(0, 2*p-n, p))
+    X = rbind(X, matrix(0, 2*p+intercept-n, p))
+    
     if( is.null(sigma) ) {
       if( is.null(y) ) {
         stop('Either the noise level "sigma" or the response variables "y" must
@@ -70,17 +88,20 @@ create.fixed <- function(X, method=c('sdp','equi'), sigma=NULL, y=NULL, randomiz
       }
     }
     if (randomize)
-      y.extra = rnorm(2*p-n, sd=sigma)
+      y.extra = rnorm(2*p-n+intercept, sd=sigma)
     else
-      y.extra = with_seed(0, rnorm(2*p-n, sd=sigma))
-    y = c(y, y.extra)
+      y.extra = with_seed(0, rnorm(2*p-n+intercept, sd=sigma))
+    y = c(y, y.extra + fitted_intercept)
   }
-  # Normalize X, if using fixed-X knockoffs
-  X = normc(X, center=F)
+  # Normalize X and y, if using fixed-X knockoffs
+  X = normc(X, center = intercept)
+  if( !is.null(y) ) {
+    y = scale(y, center = intercept, scale = F)
+  }
   
   Xk = switch(match.arg(method), 
-               "equi" = create_equicorrelated(X,randomize),
-               "sdp"  = create_sdp(X,randomize)
+               "equi" = create_equicorrelated(X,intercept,randomize),
+               "sdp"  = create_sdp(X,intercept,randomize)
               )
   structure(list(X=X, Xk=Xk, y=y), class='knockoff.variables')
 }
@@ -89,9 +110,9 @@ create.fixed <- function(X, method=c('sdp','equi'), sigma=NULL, y=NULL, randomiz
 #'  
 #' @rdname create_equicorrelated
 #' @keywords internal
-create_equicorrelated <- function(X, randomize) {
+create_equicorrelated <- function(X, intercept, randomize) {
   # Compute SVD and U_perp.
-  X.svd = decompose(X, randomize)
+  X.svd = decompose(X, intercept, randomize)
   
   # Set s = min(2 * smallest eigenvalue of X'X, 1), so that all the correlations
   # have the same value 1-s.
@@ -111,9 +132,9 @@ create_equicorrelated <- function(X, randomize) {
 #'  
 #' @rdname create_sdp
 #' @keywords internal
-create_sdp <- function(X, randomize) {
+create_sdp <- function(X, intercept, randomize) {
   # Compute SVD and U_perp.
-  X.svd = decompose(X, randomize)
+  X.svd = decompose(X, intercept, randomize)
   
   # Check for rank deficiency.
   tol = 1e-5
@@ -145,16 +166,19 @@ create_sdp <- function(X, randomize) {
 #'  
 #' @rdname decompose
 #' @keywords internal
-decompose <- function(X, randomize) {
+decompose <- function(X, intercept, randomize) {
   n = nrow(X); p = ncol(X)
-  stopifnot(n >= 2*p)
+  stopifnot(n >= 2*p+intercept)
   
-  result = canonical_svd(X)
-  Q = qr.Q(qr(cbind(result$u, matrix(0,n,p))))
-  u_perp = Q[,(p+1):(2*p)]
+  result = knockoff:::canonical_svd(X)
+  X_basis <- if(intercept){
+    cbind(result$u, rep(1, n))
+  } else{ result$u }
+  Q = qr.Q(qr(cbind(X_basis, matrix(0,n,p))))
+  u_perp = Q[,((p+1):(2*p))+intercept]
   if (randomize) {
-      Q = qr.Q(qr(rnorm_matrix(p,p)))
-      u_perp = u_perp %*% Q
+    Q = qr.Q(qr(knockoff:::rnorm_matrix(p,p)))
+    u_perp = u_perp %*% Q
   }
   result$u_perp = u_perp
   result

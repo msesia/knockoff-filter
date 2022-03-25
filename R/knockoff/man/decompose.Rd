@@ -4,7 +4,7 @@
 \alias{decompose}
 \title{Compute the SVD of X and construct an orthogonal matrix U_perp such that U_perp * U = 0.}
 \usage{
-decompose(X, randomize)
+decompose(X, intercept, randomize)
 }
 \description{
 Compute the SVD of X and construct an orthogonal matrix U_perp such that U_perp * U = 0.

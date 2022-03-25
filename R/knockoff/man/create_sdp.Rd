@@ -4,7 +4,7 @@
 \alias{create_sdp}
 \title{Create SDP fixed-X knockoffs.}
 \usage{
-create_sdp(X, randomize)
+create_sdp(X, intercept, randomize)
 }
 \description{
 Create SDP fixed-X knockoffs.

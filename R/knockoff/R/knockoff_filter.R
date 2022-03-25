@@ -92,11 +92,11 @@ NULL
 #' 
 #' @export
 knockoff.filter <- function(X, y,
-                              knockoffs=create.second_order,
-                              statistic=stat.glmnet_coefdiff, 
-                              fdr=0.10,
-                              offset=1
-                              ) {
+                            knockoffs=create.second_order,
+                            statistic=stat.glmnet_coefdiff, 
+                            fdr=0.10,
+                            offset=1
+                            ) {
   
   # Validate input types.
   if (is.data.frame(X)) {

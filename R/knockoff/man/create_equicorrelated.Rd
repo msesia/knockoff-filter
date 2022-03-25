@@ -4,7 +4,7 @@
 \alias{create_equicorrelated}
 \title{Create equicorrelated fixed-X knockoffs.}
 \usage{
-create_equicorrelated(X, randomize)
+create_equicorrelated(X, intercept, randomize)
 }
 \description{
 Create equicorrelated fixed-X knockoffs.
