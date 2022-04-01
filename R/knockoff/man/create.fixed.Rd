@@ -6,6 +6,7 @@
 \usage{
 create.fixed(
   X,
+  intercept = F,
   method = c("sdp", "equi"),
   sigma = NULL,
   y = NULL,
@@ -15,6 +16,9 @@ create.fixed(
 \arguments{
 \item{X}{normalized n-by-p matrix of original variables.(\eqn{n \geq p}).}
 
+\item{intercept}{Will the intercept be fitted (TRUE) or set to zero
+(default=FALSE).}
+
 \item{method}{either "equi" or "sdp" (default: "sdp").
 This determines the method that will be used to minimize the correlation between the original variables and the knockoffs.}
 
@@ -22,7 +26,8 @@ This determines the method that will be used to minimize the correlation between
 
 \item{y}{vector of length n, containing the observed responses. 
 This is needed to estimate the noise level if the parameter \code{sigma} is not provided, 
-in case \eqn{p \leq n < 2p} (default: NULL).}
+in case \eqn{p \leq n < 2p}.
+When \code{intercept=TRUE}, it is needed to estimate the intercept in case \eqn{p \leq n < 2p+1} (default: NULL).}
 
 \item{randomize}{whether the knockoffs are constructed deterministically or randomized (default: F).}
 }
@@ -64,7 +69,6 @@ print(result$selected)
 Barber and Candes,
   Controlling the false discovery rate via knockoffs. 
   Ann. Statist. 43 (2015), no. 5, 2055--2085.
-  \doi{10.1214/15-AOS1337}
 }
 \seealso{
 Other create: 

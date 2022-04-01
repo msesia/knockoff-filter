@@ -79,3 +79,43 @@ test_that('Gaussian equicorrelated knockoffs have the right correlation structur
   expect_equal(Sigma, SigmaHat, tolerance=2e-3)
   expect_equal(Sigma-diag_s, SigmaHatCross, tolerance=2e-3)
 })
+
+test_that('Fixed-design SDP knockoffs (with intercept adjustment) have the right correlation structure', {
+  skip_on_cran()
+  
+  n = 21; p = 10
+  X = knockoff:::normc(knockoff:::rnorm_matrix(n,p))
+  knock_variables_default = create.fixed(X, intercept=T, method='sdp', randomize=F)
+  knock_variables_randomized = create.fixed(X, intercept=T, method='sdp', randomize=T)
+  X = knock_variables_default$X
+  Xko_default = knock_variables_default$Xk
+  Xko_randomized = knock_variables_randomized$Xk
+  
+  offdiag <- function(A) A - diag(diag(A))
+  G = t(X) %*% X
+  tol = 1e-4
+  for (Xko in list(Xko_default, Xko_randomized)) {
+    expect_equal(t(Xko) %*% Xko, G, tolerance=tol)
+    expect_equal(offdiag(t(X) %*% Xko), offdiag(G), tolerance=tol)
+    expect_equal(colSums(X), colSums(Xko), tolerance=tol)
+    expect_true(all(diag(t(X) %*% Xko) < 1+tol))
+  }
+})
+
+test_that('Fixed-design equicorrelated knockoffs (with intercept adjustment) have the right correlation structure', {
+  n = 21; p = 10
+  X = knockoff:::normc(knockoff:::rnorm_matrix(n,p))
+  knock_variables_default = create.fixed(X, intercept=T, method='equi', randomize=F)
+  knock_variables_randomized = create.fixed(X, intercept=T, method='equi', randomize=T)
+  X = knock_variables_default$X
+  Xko_default = knock_variables_default$Xk
+  Xko_randomized = knock_variables_randomized$Xk
+  
+  G = t(X) %*% X
+  s = min(2*min(eigen(G)$values), 1)
+  for (Xko in list(Xko_default, Xko_randomized)) {
+    expect_equal(t(Xko) %*% Xko, G)
+    expect_equal(t(X) %*% Xko, G - diag(s,p,p))
+    expect_equal(colSums(X), colSums(Xko))
+  }
+})
